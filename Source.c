@@ -23,7 +23,7 @@ struct koren
 
 struct koren *tabulka[1000] = { NULL }, *pomocna = NULL;
 
-int n = 0 , q=1;
+int n = 0 , q = 1;
 
 
 char *randstring(size_t length) {
@@ -351,18 +351,18 @@ int hash(char *stranka)
 	return hash%1000;
 }
 
-struct vetva* OMEGAlul(struct vetva* vetva, int k)
+struct vetva* ziskajvPoradi(struct vetva* vetva, int k)
 {
-	int r;
+	int poradie;
 	if (vetva->lavy != NULL)
-		r = vetva->lavy->hodnota + 1;
+		poradie = vetva->lavy->hodnota + 1;
 	else
-		r = 1;
-	if (k == r) return vetva;
-	else if (k < r)
-		return OMEGAlul(vetva->lavy, k);
+		poradie = 1;
+	if (k == poradie) return vetva;
+	else if (k < poradie)
+		return ziskajvPoradi(vetva->lavy, k);
 	else
-		return OMEGAlul(vetva->pravy, k - r);
+		return ziskajvPoradi(vetva->pravy, k - poradie);
 }
 
 
@@ -381,34 +381,8 @@ struct vetva* najdiS(struct vetva* vetva)
 	}
 	
 	if (rodic != NULL)
-	{
-		/*rodic->vyskaL = 0;
-		aktualizujS(rodic);*/
 		rodic->lavy = NULL;
-	}
-	return hladaj;
-}
-
-struct vetva* najdiP(struct vetva* vetva)
-{
-	struct vetva *hladaj, *rodic;
-	hladaj = (struct vetva*)malloc(sizeof(struct vetva));
-	rodic = (struct vetva*)malloc(sizeof(struct vetva));
-	rodic = NULL;
-	hladaj = vetva;
-	hladaj = hladaj->lavy;
-	while (hladaj->pravy != NULL)
-	{
-		rodic = hladaj;
-		hladaj = hladaj->pravy;
-	}
 	
-	if (rodic != NULL)
-	{
-		/*rodic->vyskaP = 0;
-		aktualizujS(rodic);*/
-		rodic->pravy = NULL;
-	}
 	return hladaj;
 }
 
@@ -416,7 +390,7 @@ void like(char *page, char *user)
 {
 	struct vetva *akt;
 	struct koren *koren,*pred;
-	int poc = 0,k = 0;
+	int pocitadlo = 0, k = 0;
 	akt = (struct vetva*)malloc(sizeof(struct vetva));
 	koren = (struct koren*)malloc(sizeof(struct koren));
 	pred = (struct koren*)malloc(sizeof(struct koren));
@@ -429,7 +403,6 @@ void like(char *page, char *user)
 	}
 	else
 	{
-		
 		while (koren != NULL)
 		{
 			if (porovnaj(koren->stranka, page) == -1)
@@ -452,14 +425,14 @@ void like(char *page, char *user)
 		else
 		{
 			akt = koren->koren;
-			while (poc != 1)
+			while (pocitadlo != 1)
 			{
 				if (porovnaj(akt->meno, user) && akt->lavy == NULL)
 				{
 					akt->lavy = pridaj(user, akt);
 					akt->vyskaL += 1;
 					akt->hodnota = ziskajHodnotu(akt) + 1;
-					poc = 1;
+					pocitadlo = 1;
 					break;
 				}
 				if (porovnaj(akt->meno, user) && akt->lavy != NULL)
@@ -470,7 +443,7 @@ void like(char *page, char *user)
 					akt->pravy = pridaj(user, akt);
 					akt->vyskaP += 1;
 					akt->hodnota = ziskajHodnotu(akt) + 1;
-					poc = 1;
+					pocitadlo = 1;
 					break;
 				}
 
@@ -482,17 +455,15 @@ void like(char *page, char *user)
 			if (koren->koren->rodic != NULL) koren->koren = koren->koren->rodic;
 		}
 	}
-
 }
 
 void unlike(char *page, char *user)
 {
-	struct vetva *hladaj, *succ, *pred, *docasna;
+	struct vetva *hladaj, *succ, *docasna;
 	struct koren *koren = NULL;
 	int kon = -2, smer = -2, kvocient = 0;
 	koren = (struct koren*)malloc(sizeof(struct koren));
 	hladaj = (struct vetva*)malloc(sizeof(struct vetva));
-	pred = (struct vetva*)malloc(sizeof(struct vetva));
 	succ = (struct vetva*)malloc(sizeof(struct vetva));
 	docasna = (struct vetva*)malloc(sizeof(struct vetva));
 	koren = tabulka[hash(page)];
@@ -508,12 +479,13 @@ void unlike(char *page, char *user)
 		if (koren->koren->pravy != NULL)
 		{
 			succ = najdiS(hladaj);
-			if (succ->rodic != hladaj) succ->rodic->lavy = succ->pravy;
-			if (succ->pravy != NULL) succ->pravy->rodic = succ->rodic;
+
 			if (succ->rodic != hladaj)
 			{
 				if (succ->pravy != NULL)
 				{
+					succ->rodic->lavy = succ->pravy;
+					succ->pravy->rodic = succ->rodic;
 					succ->pravy->pravy = pridajNahradu(succ->pravy);
 					docasna = pridajNahradu(succ->pravy);
 					kvocient = 2;
@@ -534,7 +506,6 @@ void unlike(char *page, char *user)
 				}
 				else
 				{
-
 					succ->pravy = pridajNahradu(succ);
 					docasna = pridajNahradu(succ);
 				}
@@ -545,25 +516,17 @@ void unlike(char *page, char *user)
 			succ->vyskaL = hladaj->vyskaL;
 			succ->rodic = NULL;
 
-
 			if (succ != hladaj->pravy)
 			{
 				succ->pravy = hladaj->pravy;
 				hladaj->pravy->rodic = succ;
 			}
-			else
-			{
-				succ->pravy = hladaj->pravy->pravy;
-				hladaj->pravy->pravy->rodic = succ;
-			}
-
 
 			aktualizujS(docasna);
 			if (kvocient == 2) docasna->rodic->pravy = NULL;
 			else if (docasna->rodic == succ) succ->pravy = NULL;
 			else if (kvocient == 1) succ->pravy->pravy = NULL;
 			else docasna->rodic->lavy = NULL;
-			while (succ->rodic != NULL) succ = succ->rodic;
 
 			koren->koren = succ;
 
@@ -571,11 +534,8 @@ void unlike(char *page, char *user)
 		else
 			if (hladaj->lavy != NULL)
 			{
-				pred = najdiP(hladaj);
-
-				koren->koren = pred;
-				pred->rodic = NULL;
-
+				koren->koren = hladaj->lavy;
+				hladaj->lavy->rodic = NULL;
 			}
 			else
 				koren->koren = NULL;
@@ -585,7 +545,6 @@ void unlike(char *page, char *user)
 		hladaj = koren->koren;
 		while ((kon = (porovnaj(hladaj->meno, user))) != -1)
 		{
-
 			smer = kon;
 			if (kon)
 				hladaj = hladaj->lavy;
@@ -596,12 +555,12 @@ void unlike(char *page, char *user)
 		if (hladaj->pravy != NULL)
 		{
 			succ = najdiS(hladaj);
-			if (succ->rodic != hladaj) succ->rodic->lavy = succ->pravy;
-			if (succ->pravy != NULL) succ->pravy->rodic = succ->rodic;
 			if (succ->rodic != hladaj)
 			{
 				if (succ->pravy != NULL)
 				{
+					succ->rodic->lavy = succ->pravy;
+					succ->pravy->rodic = succ->rodic;
 					succ->pravy->pravy = pridajNahradu(succ->pravy);
 					docasna = pridajNahradu(succ->pravy);
 					kvocient = 2;
@@ -628,8 +587,10 @@ void unlike(char *page, char *user)
 			}
 			if (smer) hladaj->rodic->lavy = succ;
 			else hladaj->rodic->pravy = succ;
+
 			succ->rodic = hladaj->rodic;
 			succ->lavy = hladaj->lavy;
+
 			if (succ->lavy != NULL) succ->lavy->rodic = succ;
 			succ->vyskaL = hladaj->vyskaL;
 
@@ -638,12 +599,6 @@ void unlike(char *page, char *user)
 				succ->pravy = hladaj->pravy;
 				hladaj->pravy->rodic = succ;
 			}
-			else
-			{
-				succ->pravy = hladaj->pravy->pravy;
-				hladaj->pravy->pravy->rodic = succ;
-			}
-
 
 			aktualizujS(docasna);
 			if (kvocient == 2) docasna->rodic->pravy = NULL;
@@ -658,17 +613,15 @@ void unlike(char *page, char *user)
 		else
 			if (hladaj->lavy != NULL)
 			{
-				pred = najdiP(hladaj);
-				if (smer) hladaj->rodic->lavy = pred;
-				else hladaj->rodic->pravy = pred;
+				if (smer) hladaj->rodic->lavy = hladaj->lavy;
+				else hladaj->rodic->pravy = hladaj->lavy;
 
-				pred->rodic = hladaj->rodic;
-				pred->vyskaP = hladaj->vyskaP;
-				aktualizujS(pred);
+				hladaj->lavy->rodic = hladaj->rodic;
+				aktualizujS(hladaj->lavy);
 
-				while (pred->rodic != NULL) pred = pred->rodic;
-
-				koren->koren = pred;
+				hladaj = hladaj->hodnota;
+				while (hladaj->rodic != NULL) hladaj = hladaj->rodic;
+				koren->koren = hladaj;
 			}
 			else
 				if (smer)
@@ -710,8 +663,9 @@ char *getuser(char *page, int k)
 		}
 		hladaj = hladaj->dalsi;
 	}
-	if (k<= hladaj->koren->hodnota)
-	docasna = OMEGAlul(hladaj->koren, k);
+	if (k <= hladaj->koren->hodnota)
+	docasna = ziskajvPoradi(hladaj->koren, k);
+
 	if (docasna == NULL) return NULL;
 
 	return (docasna->meno);
@@ -720,7 +674,6 @@ char *getuser(char *page, int k)
 // Vlastna funkcia main() je pre vase osobne testovanie. Dolezite: pri testovacich scenaroch sa nebude spustat!
 int main()
 {
-	init();
 	char user[20][50];
 	for (int i = 0; i < 20; i++)
 	{
