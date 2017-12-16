@@ -23,7 +23,7 @@ struct koren
 
 struct koren *tabulka[1000] = { NULL }, *pomocna = NULL;
 
-int n = 0,q=1;
+int n = 0 , q=1;
 
 
 char *randstring(size_t length) {
@@ -125,7 +125,6 @@ struct vetva* pridaj(char *meno,struct vetva *rodic)
 	strcpy(pom->meno, meno);
 	pom->rodic = rodic;
 	pom->hodnota = 1;
-	//pom->meno = meno;
 	pom->vyskaP = 0;
 	pom->vyskaL = 0;
 	return pom;
@@ -302,9 +301,7 @@ void najdiRot(struct vetva *rotuj)
 		}
 
 	}
-	
 
-	//aktualzujS(rotuj);
 }
 
 void aktualizujS(struct vetva *konec)
@@ -344,41 +341,14 @@ void aktualizujS(struct vetva *konec)
 	}
 }
 
-void init()
-{
-}
-
 int hash(char *stranka)
 {
 	int hash = 0;
 	for (int i = 0; i < strlen(stranka); i++)
 	{
 		hash += (stranka[i] - '0');
-		//hash -= i;
 	}
 	return hash%1000;
-}
-
-struct vetva* InOrder(struct vetva* vetva, int k)
-{
-	//printf("aa\n");
-	if (vetva == NULL)
-	{
-		//printf("bengo\n");
-		return NULL;
-	}
-	InOrder(vetva->lavy, k);
-
-	n++;
-	if (n == k)
-	{
-		//printf("bb\n");
-		pomocna = (struct vetva*)malloc(sizeof(struct vetva));
-		pomocna = vetva;
-	}
-
-	InOrder(vetva->pravy, k);
-	return pomocna;
 }
 
 struct vetva* OMEGAlul(struct vetva* vetva, int k)
@@ -447,9 +417,6 @@ void like(char *page, char *user)
 	struct vetva *akt;
 	struct koren *koren,*pred;
 	int poc = 0,k = 0;
-	//printf("%d %d %d %d\n", q++, user[0], user[1], hash(page));
-	printf("%s %s\n", page, user);
-	//  1582 1285 1377 1220 1291 1399 1294 1489 1366 1392
 	akt = (struct vetva*)malloc(sizeof(struct vetva));
 	koren = (struct koren*)malloc(sizeof(struct koren));
 	pred = (struct koren*)malloc(sizeof(struct koren));
@@ -523,7 +490,6 @@ void unlike(char *page, char *user)
 	struct vetva *hladaj, *succ, *pred, *docasna;
 	struct koren *koren = NULL;
 	int kon = -2, smer = -2, kvocient = 0;
-	printf("%s %s %d ", page, user);
 	koren = (struct koren*)malloc(sizeof(struct koren));
 	hladaj = (struct vetva*)malloc(sizeof(struct vetva));
 	pred = (struct vetva*)malloc(sizeof(struct vetva));
@@ -539,7 +505,6 @@ void unlike(char *page, char *user)
 	if (porovnaj(koren->koren->meno, user) == -1)
 	{
 		hladaj = koren->koren;
-		printf("root\n");
 		if (koren->koren->pravy != NULL)
 		{
 			succ = najdiS(hladaj);
@@ -637,14 +602,12 @@ void unlike(char *page, char *user)
 			{
 				if (succ->pravy != NULL)
 				{
-					printf("1111\n");
 					succ->pravy->pravy = pridajNahradu(succ->pravy);
 					docasna = pridajNahradu(succ->pravy);
 					kvocient = 2;
 				}
 				else
 				{
-					printf("2222\n");
 					succ->rodic->lavy = pridajNahradu(succ->rodic);
 					docasna = pridajNahradu(succ->rodic);
 				}
@@ -653,14 +616,12 @@ void unlike(char *page, char *user)
 			{
 				if (succ->pravy != NULL)
 				{
-					printf("3333\n");
 					succ->pravy->pravy = pridajNahradu(succ->pravy);
 					docasna = pridajNahradu(succ->pravy);
 					kvocient = 1;
 				}
 				else
 				{
-					printf("4444\n");
 					succ->pravy = pridajNahradu(succ);
 					docasna = pridajNahradu(succ);
 				}
@@ -697,7 +658,6 @@ void unlike(char *page, char *user)
 		else
 			if (hladaj->lavy != NULL)
 			{
-				printf("lavy\n");
 				pred = najdiP(hladaj);
 				if (smer) hladaj->rodic->lavy = pred;
 				else hladaj->rodic->pravy = pred;
@@ -713,28 +673,20 @@ void unlike(char *page, char *user)
 			else
 				if (smer)
 				{
-					printf("nodeL\n");
 					hladaj->rodic->lavy = pridajNahradu(hladaj->rodic);
 					docasna = pridajNahradu(hladaj->rodic);
 					aktualizujS(docasna);
 					hladaj->rodic->lavy = NULL;
 					while (hladaj->rodic != NULL) hladaj = hladaj->rodic;
-
 					koren->koren = hladaj;
 				}
 				else
 				{
-					printf("nodeP\n");
-					//if (hladaj->rodic->rodic != NULL)
-					//	printf("%d  %d  ", hladaj->rodic->rodic->vyskaP, hladaj->rodic->rodic->vyskaL);
 					hladaj->rodic->pravy = pridajNahradu(hladaj->rodic);
 					docasna = pridajNahradu(hladaj->rodic);
-					//printf("xaxaxa");
 					aktualizujS(docasna);
 					hladaj->rodic->pravy = NULL;
-					//printf("xaxaxa");
 					while (hladaj->rodic != NULL) hladaj = hladaj->rodic;
-
 					koren->koren = hladaj;
 				}
 	}
@@ -745,45 +697,24 @@ char *getuser(char *page, int k)
 	struct vetva* docasna = NULL;
 	struct koren *hladaj = NULL;
 	n = 0;
-	//printf("\n\n..%s %d %d\n", page, k, hash(page));
+
 	pomocna = NULL;
 
 	hladaj = tabulka[hash(page)];
-	//printf("%d\n", hash(page));
+
 	while (hladaj != NULL)
 	{
 		if (porovnaj(hladaj->stranka, page) == -1)
 		{
-			//printf("fak\n");
 			break;
 		}
 		hladaj = hladaj->dalsi;
 	}
-	//if (hladaj->koren == NULL) return NULL;
 	if (k<= hladaj->koren->hodnota)
 	docasna = OMEGAlul(hladaj->koren, k);
-	//if (docasna == NULL) printf("ff\n");
 	if (docasna == NULL) return NULL;
-	printf("%d %d\n", docasna->vyskaL, docasna->vyskaP);
-	//printf("%d ", docasna->hodnota);
-	printf("%s\n", docasna->meno);
+
 	return (docasna->meno);
-}
-
-
-void printInorder(struct vetva* node)
-{
-	if (node == NULL)
-		return;
-
-	/* first recur on left child */
-	printInorder(node->lavy);
-
-	/* then print the data of node */
-	printf("%s ", node->meno);
-
-	/* now recur on right child */
-	printInorder(node->pravy);
 }
 
 // Vlastna funkcia main() je pre vase osobne testovanie. Dolezite: pri testovacich scenaroch sa nebude spustat!
@@ -791,7 +722,6 @@ int main()
 {
 	init();
 	char user[20][50];
-	//user[1] = randstring(40);
 	for (int i = 0; i < 20; i++)
 	{
 		
@@ -802,12 +732,12 @@ int main()
 	printf("----------------------------\n------------------------------\n");
 	for (int i = 1; i <= 12; i++)
 	{
-		getuser("asd", i);
+		printf("%s\n",getuser("asd", i));
 	}
 	printf("----------------------------\n------------------------------\n");
 	for (int i = 1; i <= 12; i++)
 	{
-		getuser("dsa", i);
+		printf("%s\n",getuser("dsa", i));
 	}
 	printf("----------------------------\n------------------------------\n");
 	for (int i = 3; i < 7; i++)
@@ -819,22 +749,13 @@ int main()
 	printf("----------------------------\n------------------------------\n");
 	for (int i = 1; i <= 12; i++)
 	{
-		getuser("asd", i);
+		printf("%s\n",getuser("asd", i));
 	}
 	printf("----------------------------\n------------------------------\n");
 	for (int i = 1; i <= 12; i++)
 	{
-		getuser("dsa", i);
+		printf("%s\n",getuser("dsa", i));
 	}
 
-
-	like("a", "x");
-	like("a", "y");
-	//like("a", "z");
-	
-	getuser("a", 1);
-	getuser("a", 2);
-	getuser("a", 3);
-	getuser("a", 14);
 		return 0;
 }
